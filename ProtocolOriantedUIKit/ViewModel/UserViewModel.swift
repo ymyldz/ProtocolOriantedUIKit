@@ -25,7 +25,7 @@ class UserViewModel {
             case .success(let user):
                 self?.output?.updateView(name: user.name, username: user.username, email: user.email)
             case .failure(_):
-                self?.output?.updateView(name: "No user ", username: "", email: "")
+                self?.output?.updateView(name: "No user", username: "", email: "")
 
             }
         }

@@ -9,28 +9,64 @@ import XCTest
 @testable import ProtocolOriantedUIKit
 
 final class ProtocolOriantedUIKitTests: XCTestCase {
-
+    
+    private var userViewModel : UserViewModel!
+    
+    private var userService : MockUserService!
+    
+    private var output : MockUserViewModelOutput!
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        userService = MockUserService()
+        userViewModel = UserViewModel(userService: userService)
+        output = MockUserViewModelOutput()
+        userViewModel.output = output
     }
-
+    
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        
     }
-
+    
     func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+        
+        
     }
+    
+    func testUpdateView_whenAPISucces_showsNameUsernameEmail() throws {
+        let mock = User(id: 1, name: "Yusuf", username: "ymyldz", email: "ymyldz1905@gmail.com", address: Address(street: "", suite: "", city: "", zipcode: "", geo: .init(lat: "", lng: "")), phone: "", website: "", company: .init(name: "", catchPhrase: "", bs: ""))
+        userService.fetchUserMockResult = .success(mock)
+        
+        userViewModel.fetchUser()
+        
+        XCTAssertEqual(output.updateArray.first?.userName, "ymyldz")
+    }
+    
+    func testUpdateView_whenAPIFailure_showsNoUser() throws {
+        userService.fetchUserMockResult = .failure(NSError())
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+        userViewModel.fetchUser()
+
+        XCTAssertEqual(output.updateArray.first?.name, "No user")
+    }
+    
+    class MockUserService : UserService {
+        var fetchUserMockResult : Result<ProtocolOriantedUIKit.User, Error>?
+        func fetchUser(completion: @escaping (Result<ProtocolOriantedUIKit.User, Error>) -> Void) {
+            if let result = fetchUserMockResult {
+                completion(result)
+            }
         }
+        
+        
     }
-
+    class MockUserViewModelOutput : UserViewModelOutput {
+        var updateArray : [(name:String,userName:String,email:String)] = []
+        
+        func updateView(name: String, username: String, email: String) {
+            updateArray.append((name,username,email))
+        }
+        
+        
+        
+    }
 }
